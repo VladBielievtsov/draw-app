@@ -1,25 +1,38 @@
 import { RefObject, useEffect, useRef, useState } from "react";
-import { Stage, Layer, Line } from "react-konva";
+import { Stage, Layer, Line, Rect, Transformer } from "react-konva";
 import Konva from "konva";
 
-interface ILine {
-  color: string;
-  stroke: number;
+import Burger from "./components/Burger";
+import Tools from "./components/Tools";
+import PenOptions from "./components/PenOptions";
+
+export interface ILine {
+  currentColor: string;
+  currentStroke: number;
   points: any;
 }
 
 function App() {
-  const [color, setColor] = useState("#d3d3d3");
-  const [stroke, setStroke] = useState(5);
+  const tools = ["pen", "mouse"];
+  const [currentTool, setCurrentTool] = useState("mouse");
+  const [currentColor, setCurrentColor] = useState("#d3d3d3");
+  const [currentStroke, setCurrentStroke] = useState(5);
   const stageRef: RefObject<Konva.Stage> = useRef(null);
+  const rectRef: RefObject<Konva.Rect> = useRef(null);
+  const trRef = useRef<Konva.Transformer>(null);
   const [lines, setLines] = useState<ILine[]>([]);
   const isDrawing = useRef(false);
 
   const handleMouseDown = (evt: Konva.KonvaEventObject<MouseEvent>) => {
-    isDrawing.current = true;
-    const pos = evt.target.getStage()?.getPointerPosition();
-    if (pos) {
-      setLines([...lines, { color, stroke, points: [pos.x, pos.y] }]);
+    if (currentTool === "pen") {
+      isDrawing.current = true;
+      const pos = evt.target.getStage()?.getPointerPosition();
+      if (pos) {
+        setLines([
+          ...lines,
+          { currentColor, currentStroke, points: [pos.x, pos.y] },
+        ]);
+      }
     }
   };
 
@@ -40,46 +53,39 @@ function App() {
     isDrawing.current = false;
   };
 
-  const colors = ["#d3d3d3", "#e03131", "#2f9e44", "#1971c2", "#f08c00"];
+  const colors = [
+    "#d3d3d3",
+    "#e03131",
+    "#2f9e44",
+    "#1971c2",
+    "#6a5acd",
+    "#f08c00",
+  ];
 
   useEffect(() => {
     document.querySelectorAll(".colors button")[0].classList.add("active");
+
+    if (rectRef.current && trRef.current) {
+      trRef.current.nodes([rectRef.current]);
+    }
   }, []);
 
-  const changeColor = (color: string) => {
-    setColor(color);
-  };
-
   const strokeSizes = [5, 10, 15];
-
-  const changeStroke = (stroke: number) => {
-    setStroke(stroke);
-  };
-
-  const downloadURI = (uri: string | undefined, name: string) => {
-    const link = document.createElement("a");
-    link.download = name;
-    link.href = uri || "";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleExport = () => {
-    const uri = stageRef.current?.toDataURL();
-    downloadURI(uri, "image.png");
-  };
 
   return (
     <>
       <div className="paint">
-        <header>
-          <button className="btn save" onClick={() => handleExport()}>
-            Save
-          </button>
-          <button className="btn clear" onClick={() => setLines([])}>
-            Clear
-          </button>
+        <header className="w-full">
+          <div className="absolute z-10 top-4 left-4">
+            <Burger stageRef={stageRef} setLines={setLines} />
+          </div>
+          <div className="absolute z-10 top-4 right-4">
+            <Tools
+              tools={tools}
+              currentTool={currentTool}
+              setCurrentTool={setCurrentTool}
+            />
+          </div>
         </header>
         <main>
           <Stage
@@ -91,13 +97,32 @@ function App() {
             ref={stageRef}
           >
             <Layer>
+              <Rect
+                width={window.innerWidth}
+                height={window.innerHeight}
+                fill="#121212"
+              />
+              <Rect
+                width={40}
+                height={40}
+                fill="#f00"
+                x={window.innerWidth / 2 - 20}
+                y={window.innerHeight / 2 - 20}
+                ref={rectRef}
+                draggable
+              />
+              <Transformer
+                // anchorStroke="red"
+                // anchorFill="yellow"
+                // anchorSize={20}
+                ref={trRef}
+              />
               {lines.map((line, id) => (
                 <Line
                   key={id}
                   points={line.points}
-                  stroke={line.color}
-                  strokeWidth={line.stroke}
-                  // tr={0.5}
+                  stroke={line.currentColor}
+                  strokeWidth={line.currentStroke}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   tension={0.5}
@@ -106,33 +131,15 @@ function App() {
             </Layer>
           </Stage>
         </main>
-        <div className="settings">
-          <div className="colors">
-            {colors.map((color) => (
-              <button
-                key={color}
-                style={{ backgroundColor: color }}
-                title={color}
-                onClick={() => changeColor(color)}
-              ></button>
-            ))}
-          </div>
-          <div className="size">
-            <p>Stroke width</p>
-            <div>
-              {strokeSizes.map((stroke) => (
-                <button
-                  key={stroke}
-                  className="btn"
-                  title={String(stroke)}
-                  onClick={() => changeStroke(stroke)}
-                >
-                  {stroke}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <PenOptions
+          isVisible={currentTool === "pen"}
+          colors={colors}
+          currentColor={currentColor}
+          setCurrentColor={setCurrentColor}
+          strokeSizes={strokeSizes}
+          currentStroke={currentStroke}
+          setCurrentStroke={setCurrentStroke}
+        />
       </div>
     </>
   );
