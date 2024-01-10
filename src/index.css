@@ -45,6 +45,7 @@ header {
   top: 0;
   left: 0;
   padding: 20px;
+  z-index: 10;
 }
 
 header .btn {
@@ -69,7 +70,8 @@ header .btn {
 
 .size button {
   width: 43px;
-  height: 43;
+  height: 43; 
+  margin-right: 10px;
 }
 
 .size button.active {

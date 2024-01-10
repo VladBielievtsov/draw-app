@@ -1,45 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-
-  <div class="paint">
-    <header>
-      <button class="btn save">
-        Save
-      </button>
-      <button class="btn clear">
-        Clear
-      </button>
-    </header>
-    <main>
-      <canvas></canvas>
-    </main>
-    <div class="settings">
-      <div class="colors">
-        <button style="--color: #d3d3d3" title="#d3d3d3"></button>
-        <button style="--color: #e03131" title="#e03131"></button>
-        <button style="--color: #2f9e44" title="#2f9e44"></button>
-        <button style="--color: #1971c2" title="#1971c2"></button>
-        <button style="--color: #f08c00" title="#f08c00"></button>
-      </div>
-      <div class="size">
-        <p>Stroke width</p>
-        <div>
-          <button class="btn" title="5">5</button>
-          <button class="btn" title="10">10</button>
-          <button class="btn" title="15">15</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="./index.js"></script>
-  
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
