@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Stage, Layer, Line } from "react-konva";
 import Konva from "konva";
 
@@ -11,6 +11,7 @@ interface ILine {
 function App() {
   const [color, setColor] = useState("#d3d3d3");
   const [stroke, setStroke] = useState(5);
+  const stageRef: RefObject<Konva.Stage> = useRef(null);
   const [lines, setLines] = useState<ILine[]>([]);
   const isDrawing = useRef(false);
 
@@ -55,11 +56,27 @@ function App() {
     setStroke(stroke);
   };
 
+  const downloadURI = (uri: string | undefined, name: string) => {
+    const link = document.createElement("a");
+    link.download = name;
+    link.href = uri || "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExport = () => {
+    const uri = stageRef.current?.toDataURL();
+    downloadURI(uri, "image.png");
+  };
+
   return (
     <>
       <div className="paint">
         <header>
-          {/* <button className="btn save">Save</button> */}
+          <button className="btn save" onClick={() => handleExport()}>
+            Save
+          </button>
           <button className="btn clear" onClick={() => setLines([])}>
             Clear
           </button>
@@ -71,6 +88,7 @@ function App() {
             onMouseDown={handleMouseDown}
             onMousemove={handlerMouseMove}
             onMouseup={handleMouseUp}
+            ref={stageRef}
           >
             <Layer>
               {lines.map((line, id) => (
