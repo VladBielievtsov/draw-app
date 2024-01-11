@@ -3,14 +3,15 @@ import React, { RefObject, useState } from "react";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoImageOutline } from "react-icons/io5";
 import { RiDeleteBin7Line } from "react-icons/ri";
-import { ILine } from "../App";
+import { ILine, IText } from "../App";
 
 interface BurgerProps {
   stageRef: RefObject<Konva.Stage>;
   setLines: React.Dispatch<React.SetStateAction<ILine[]>>;
+  setText: React.Dispatch<React.SetStateAction<IText[]>>;
 }
 
-export default function Burger({ stageRef, setLines }: BurgerProps) {
+export default function Burger({ stageRef, setLines, setText }: BurgerProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const downloadURI = (uri: string | undefined, name: string) => {
@@ -25,6 +26,11 @@ export default function Burger({ stageRef, setLines }: BurgerProps) {
   const handleExport = () => {
     const uri = stageRef.current?.toDataURL();
     downloadURI(uri, "image.png");
+  };
+
+  const clear = () => {
+    setLines([]);
+    setText([]);
   };
 
   return (
@@ -48,7 +54,7 @@ export default function Burger({ stageRef, setLines }: BurgerProps) {
         </button>
         <button
           className=" hover:bg-[#2a2a2a] rounded-md text-left px-2.5 h-[36px] w-full flex items-center text-white space-x-2"
-          onClick={() => setLines([])}
+          onClick={() => clear()}
         >
           <div>
             <RiDeleteBin7Line />

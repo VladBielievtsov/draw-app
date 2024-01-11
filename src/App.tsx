@@ -1,5 +1,5 @@
-import { RefObject, useEffect, useRef, useState } from "react";
-import { Stage, Layer, Line, Rect, Transformer } from "react-konva";
+import { RefObject, createElement, useEffect, useRef, useState } from "react";
+import { Stage, Layer, Line, Rect, Transformer, Text } from "react-konva";
 import Konva from "konva";
 
 import Burger from "./components/Burger";
@@ -12,16 +12,28 @@ export interface ILine {
   points: any;
 }
 
+export interface IText {
+  text: string;
+  points: any;
+}
+
 function App() {
-  const tools = ["pen", "mouse"];
+  // Tools
+  const tools = ["mouse", "pen", "text"];
   const [currentTool, setCurrentTool] = useState("mouse");
+  // Draw
   const [currentColor, setCurrentColor] = useState("#d3d3d3");
   const [currentStroke, setCurrentStroke] = useState(5);
+  const [lines, setLines] = useState<ILine[]>([]);
+  const isDrawing = useRef(false);
+  // Text
+  const [text, setText] = useState<IText[]>([]);
+  const isWritning = useRef(false);
+  const [tempPos, setTempPos] = useState<any>([]);
+  // Other
   const stageRef: RefObject<Konva.Stage> = useRef(null);
   const rectRef: RefObject<Konva.Rect> = useRef(null);
   const trRef = useRef<Konva.Transformer>(null);
-  const [lines, setLines] = useState<ILine[]>([]);
-  const isDrawing = useRef(false);
 
   const handleMouseDown = (evt: Konva.KonvaEventObject<MouseEvent>) => {
     if (currentTool === "pen") {
@@ -32,6 +44,51 @@ function App() {
           ...lines,
           { currentColor, currentStroke, points: [pos.x, pos.y] },
         ]);
+      }
+    } else if (currentTool === "text") {
+      const pos = evt.target.getStage()?.getPointerPosition();
+      if (!isWritning.current) {
+        isWritning.current = true;
+        setTempPos([pos?.x, pos?.y]);
+        if (pos) {
+          const textarea = document.createElement("input");
+          textarea.classList.add("textEditing");
+          textarea.style.cssText = `
+          position:absolute;
+          top: calc(${pos.y}px - 3px);
+          left:${pos.x}px;
+          background-color:transparent;
+          border:0;
+          outline:0;
+          color:#d3d3d3;
+          font-family: 'Architects Daughter';
+          font-size: 40px;
+          line-height: 1.2;
+          width: calc(100% - ${pos.x}px);
+          `;
+          textarea.type = "text";
+          document.querySelector(".paint")?.appendChild(textarea);
+          setTimeout(() => {
+            textarea.focus();
+          }, 0);
+        }
+      } else {
+        isWritning.current = false;
+        const textInput = document.querySelector(
+          "input.textEditing"
+        ) as HTMLInputElement;
+        setText([
+          ...text,
+          {
+            text: (
+              document.querySelector("input.textEditing") as HTMLInputElement
+            ).value,
+            points: [tempPos[0], tempPos[1]],
+          },
+        ]);
+        textInput?.remove();
+        setTempPos([]);
+        setCurrentTool("mouse");
       }
     }
   };
@@ -77,7 +134,7 @@ function App() {
       <div className="paint">
         <header className="w-full">
           <div className="absolute z-10 top-4 left-4">
-            <Burger stageRef={stageRef} setLines={setLines} />
+            <Burger stageRef={stageRef} setLines={setLines} setText={setText} />
           </div>
           <div className="absolute z-10 top-4 right-4">
             <Tools
@@ -87,7 +144,7 @@ function App() {
             />
           </div>
         </header>
-        <main>
+        <main className="cursor-crosshair">
           <Stage
             width={window.innerWidth}
             height={window.innerHeight}
@@ -102,7 +159,19 @@ function App() {
                 height={window.innerHeight}
                 fill="#121212"
               />
-              <Rect
+              {text.map((txt, id) => (
+                <Text
+                  key={id}
+                  text={txt.text}
+                  fill={"#d3d3d3"}
+                  x={txt.points[0]}
+                  y={txt.points[1]}
+                  fontSize={40}
+                  fontFamily="Architects Daughter"
+                  lineHeight={1.2}
+                />
+              ))}
+              {/* <Rect
                 width={40}
                 height={40}
                 fill="#f00"
@@ -116,7 +185,7 @@ function App() {
                 // anchorFill="yellow"
                 // anchorSize={20}
                 ref={trRef}
-              />
+              /> */}
               {lines.map((line, id) => (
                 <Line
                   key={id}

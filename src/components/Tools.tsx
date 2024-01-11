@@ -1,6 +1,7 @@
 import React from "react";
 import { GoPencil } from "react-icons/go";
 import { LuMousePointer2 } from "react-icons/lu";
+import { IoText } from "react-icons/io5";
 
 interface ToolsProps {
   tools: string[];
@@ -28,6 +29,7 @@ export default function Tools({
         >
           {item === "pen" && <GoPencil />}
           {item === "mouse" && <LuMousePointer2 />}
+          {item === "text" && <IoText />}
         </button>
       ))}
     </div>
