@@ -5,6 +5,7 @@ import Konva from "konva";
 import Burger from "./components/Burger";
 import Tools from "./components/Tools";
 import PenOptions from "./components/PenOptions";
+import TextOptions from "./components/TextOptions";
 
 export interface ILine {
   currentColor: string;
@@ -15,6 +16,7 @@ export interface ILine {
 export interface IText {
   text: string;
   points: any;
+  currentTextColor: string;
 }
 
 function App() {
@@ -28,6 +30,7 @@ function App() {
   const isDrawing = useRef(false);
   // Text
   const [text, setText] = useState<IText[]>([]);
+  const [currentTextColor, setCurrentTextColor] = useState("#d3d3d3");
   const isWritning = useRef(false);
   const [tempPos, setTempPos] = useState<any>([]);
   // Other
@@ -60,7 +63,7 @@ function App() {
           background-color:transparent;
           border:0;
           outline:0;
-          color:#d3d3d3;
+          color:${currentTextColor};
           font-family: 'Architects Daughter';
           font-size: 40px;
           line-height: 1.2;
@@ -83,6 +86,7 @@ function App() {
             text: (
               document.querySelector("input.textEditing") as HTMLInputElement
             ).value,
+            currentTextColor,
             points: [tempPos[0], tempPos[1]],
           },
         ]);
@@ -152,6 +156,7 @@ function App() {
             onMousemove={handlerMouseMove}
             onMouseup={handleMouseUp}
             ref={stageRef}
+            // draggable={currentTool === "mouse"}
           >
             <Layer>
               <Rect
@@ -163,7 +168,7 @@ function App() {
                 <Text
                   key={id}
                   text={txt.text}
-                  fill={"#d3d3d3"}
+                  fill={txt.currentTextColor}
                   x={txt.points[0]}
                   y={txt.points[1]}
                   fontSize={40}
@@ -208,6 +213,12 @@ function App() {
           strokeSizes={strokeSizes}
           currentStroke={currentStroke}
           setCurrentStroke={setCurrentStroke}
+        />
+        <TextOptions
+          isVisible={currentTool === "text"}
+          colors={colors}
+          currentTextColor={currentTextColor}
+          setCurrentTextColor={setCurrentTextColor}
         />
       </div>
     </>
